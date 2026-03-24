@@ -18,7 +18,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0d0d0d; font-family: 'Thernaly', sans-serif; color: #e8e4dc; min-height: 100vh; }
 html, body { overflow-x: hidden; }
-.app { max-width: 960px; margin: 0 auto; padding: 2.5rem 2rem; box-sizing: border-box; width: 100%; }
+body { padding: 0 clamp(1.5rem, 6vw, 5rem); }
+.app { max-width: 960px; margin: 0 auto; padding: 2.5rem 0; }
 
 .header { display: flex; align-items: center; border-bottom: 1px solid #2a2a2a; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
 .logo-img { width: 240px; height: auto; }
@@ -68,7 +69,8 @@ html, body { overflow-x: hidden; }
 .film-friend-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .film-info-mobile-row { display: none; gap: 6px; align-items: center; margin-top: 4px; }
 @media (max-width: 600px) {
-  .app { padding: 1.25rem 1rem; }
+  body { padding: 0 1rem; }
+  .app { padding: 1.5rem 0; }
   .film-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
   .film-title { font-size: 12px; }
   .film-hover-overlay { display: none; }
@@ -504,7 +506,11 @@ function filterFriendSuggestions(q) {
   const el = document.getElementById('friend-suggestions');
   if (!el) return;
   const matches = friends.filter(f => !q || f.name.toLowerCase().includes(q.toLowerCase()));
-  if (matches.length === 0) { el.style.display = 'none'; return; }
+  if (matches.length === 0) {
+    el.innerHTML = `<div style="padding:8px 12px;font-size:11px;color:#555;font-style:italic;">type a name to add someone new</div>`;
+    el.style.display = 'block';
+    return;
+  }
   el.innerHTML = matches.map(f =>
     `<div style="padding:8px 12px;cursor:pointer;font-size:13px;color:#e8e4dc;" onmousedown="pickFriend('${f.name.replace(/'/g,"\\'")}')">
       ${f.name}
@@ -519,7 +525,9 @@ function pickFriend(name) {
 }
 
 async function addFilm() {
-  if (!selectedFilm) { alert('Please search for and select a film first.'); return; }
+  if (!selectedFilm) { alert('Select a film from the search results first.'); return; }
+  const addBtn = document.querySelector('#modal .btn-primary');
+  if (addBtn) { addBtn.textContent = 'saving…'; addBtn.disabled = true; }
   const friend = document.getElementById('input-friend').value.trim() || '';
 
   // Auto-add new friend if not in list
@@ -548,7 +556,11 @@ async function addFilm() {
     tagline
   }).select().single();
 
-  if (error) { console.error('addFilm error:', error); return; }
+  if (error) {
+    alert('Error saving film: ' + error.message);
+    if (addBtn) { addBtn.textContent = 'add'; addBtn.disabled = false; }
+    return;
+  }
 
   const key = `${selectedFilm.title}_${selectedFilm.year}`;
   cache[key] = { poster: selectedFilm.poster, tagline };
