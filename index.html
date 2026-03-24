@@ -87,6 +87,20 @@ body { background: #0d0d0d; font-family: 'Thernaly', sans-serif; color: #e8e4dc;
 .modal-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
 .btn-primary { flex: 1; background: #c8a96e; border: none; color: #0d0d0d; font-family: 'Thernaly', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px; border-radius: 2px; cursor: pointer; font-weight: 500; }
 .btn-cancel { background: none; border: 1px solid #2a2a2a; color: #555; font-family: 'Thernaly', sans-serif; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 16px; border-radius: 2px; cursor: pointer; }
+.search-results { max-height: 260px; overflow-y: auto; margin-top: 6px; }
+.search-result-item { display: flex; align-items: center; gap: 10px; padding: 7px 8px; cursor: pointer; border-radius: 2px; transition: background 0.12s; }
+.search-result-item:hover { background: #1e1e1e; }
+.search-result-poster { width: 32px; height: 48px; object-fit: cover; border-radius: 1px; background: #1a1a1a; flex-shrink: 0; }
+.search-result-info { display: flex; flex-direction: column; gap: 2px; }
+.search-result-title { font-size: 13px; color: #e8e4dc; }
+.search-result-year { font-size: 11px; color: #555; }
+.selected-film { display: flex; gap: 12px; align-items: flex-start; padding: 10px; background: #161616; border-radius: 2px; margin-bottom: 4px; }
+.selected-film-poster { width: 48px; height: 72px; object-fit: cover; border-radius: 1px; background: #1a1a1a; flex-shrink: 0; }
+.selected-film-info { display: flex; flex-direction: column; gap: 4px; }
+.selected-film-title { font-family: 'Verve', serif; font-size: 16px; color: #e8e4dc; }
+.selected-film-year { font-size: 11px; color: #555; }
+.selected-film-genres { display: flex; gap: 4px; flex-wrap: wrap; }
+.selected-film-genre { font-size: 10px; color: #555; border: 1px solid #2a2a2a; padding: 1px 6px; border-radius: 1px; }
 
 .friends-list { display: flex; flex-direction: column; gap: 1px; }
 .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #1a1a1a; }
@@ -155,6 +169,13 @@ let activeGenre = null;
 let friendColorMap = {};
 let colorIndex = 0;
 let currentTab = 'films';
+
+const TMDB_GENRES = {
+  28:'action',12:'adventure',16:'animation',35:'comedy',80:'crime',
+  99:'documentary',18:'drama',10751:'family',14:'fantasy',36:'history',
+  27:'horror',10402:'music',9648:'mystery',10749:'romance',878:'sci-fi',
+  10770:'tv movie',53:'thriller',10752:'war',37:'western'
+};
 
 const FRIEND_COLORS = [
   { bg:'rgba(123,167,196,0.15)', border:'#7ba7c4', text:'#7ba7c4' },
@@ -378,53 +399,145 @@ function filterByFriend(name) {
   render();
 }
 
-// Add film
+let selectedFilm = null;
+let searchTimeout = null;
+
 function openModal() {
+  selectedFilm = null;
   const friendOpts = friends.map(f => `<option value="${f.name}">${f.name}</option>`).join('');
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.id = 'modal';
   overlay.innerHTML = `<div class="modal">
     <div class="modal-title">add rec</div>
-    <div class="field"><input id="input-title" placeholder="title" /></div>
-    <div class="field"><input id="input-year" type="number" placeholder="year" value="${new Date().getFullYear()}" /></div>
-    <div class="field"><select id="input-friend"><option value="">— who recommended it —</option>${friendOpts}</select></div>
-    <div class="field"><input id="input-genres" placeholder="genres (comma separated)" /></div>
-    <div class="field"><input id="input-lb" type="number" step="0.1" min="0" max="5" placeholder="letterboxd score" /></div>
+    <div class="field">
+      <input id="film-search" placeholder="search for a film…" autocomplete="off" oninput="searchFilms(this.value)" />
+    </div>
+    <div class="search-results" id="search-results"></div>
+    <div id="selected-film-preview" style="display:none;">
+      <div class="selected-film">
+        <img class="selected-film-poster" id="sel-poster" src="" alt="" />
+        <div class="selected-film-info">
+          <div class="selected-film-title" id="sel-title"></div>
+          <div class="selected-film-year" id="sel-year"></div>
+          <div class="selected-film-genres" id="sel-genres"></div>
+        </div>
+      </div>
+      <div class="field">
+        <select id="input-friend"><option value="">— who recommended it —</option>${friendOpts}</select>
+      </div>
+      <div class="field">
+        <input id="input-lb" type="number" step="0.1" min="0" max="5" placeholder="letterboxd score (optional)" />
+      </div>
+    </div>
     <div class="modal-btns">
       <button class="btn-primary" onclick="addFilm()">add</button>
       <button class="btn-cancel" onclick="closeModal()">cancel</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
-  document.getElementById('input-title').focus();
+  document.getElementById('film-search').focus();
 }
 
 function closeModal() {
   const m = document.getElementById('modal');
   if (m) m.remove();
+  selectedFilm = null;
+  if (searchTimeout) clearTimeout(searchTimeout);
+}
+
+async function searchFilms(query) {
+  const resultsEl = document.getElementById('search-results');
+  if (!query || query.length < 2) { resultsEl.innerHTML = ''; return; }
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    try {
+      const r = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=8265bd1679663a7ea12ac168da84d2e8&query=${encodeURIComponent(query)}&include_adult=false`);
+      const d = await r.json();
+      const results = (d.results || []).slice(0, 6);
+      resultsEl.innerHTML = results.map((m, i) => {
+        const year = m.release_date ? m.release_date.slice(0,4) : '';
+        const poster = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : '';
+        return `<div class="search-result-item" onclick="selectFilm(${i})" data-idx="${i}">
+          <img class="search-result-poster" src="${poster}" alt="" onerror="this.style.visibility='hidden'" />
+          <div class="search-result-info">
+            <span class="search-result-title">${m.title}</span>
+            <span class="search-result-year">${year}</span>
+          </div>
+        </div>`;
+      }).join('');
+      // Store results on the element for selectFilm to access
+      resultsEl._results = results;
+    } catch(e) { resultsEl.innerHTML = ''; }
+  }, 300);
+}
+
+function selectFilm(idx) {
+  const resultsEl = document.getElementById('search-results');
+  const movie = resultsEl._results && resultsEl._results[idx];
+  if (!movie) return;
+  const year = movie.release_date ? parseInt(movie.release_date.slice(0,4)) : null;
+  const genres = (movie.genre_ids || []).map(id => TMDB_GENRES[id]).filter(Boolean);
+  const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : null;
+  selectedFilm = { tmdbId: movie.id, title: movie.title, year, genres: genres.length ? genres : ['uncategorised'], poster };
+
+  // Show preview
+  document.getElementById('sel-title').textContent = movie.title;
+  document.getElementById('sel-year').textContent = year || '';
+  document.getElementById('sel-poster').src = poster || '';
+  document.getElementById('sel-poster').style.visibility = poster ? 'visible' : 'hidden';
+  document.getElementById('sel-genres').innerHTML = selectedFilm.genres.map(g =>
+    `<span class="selected-film-genre">${g}</span>`).join('');
+  document.getElementById('selected-film-preview').style.display = '';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('film-search').value = movie.title;
 }
 
 async function addFilm() {
-  const title = document.getElementById('input-title').value.trim();
-  if (!title) return;
-  const year = parseInt(document.getElementById('input-year').value) || new Date().getFullYear();
+  if (!selectedFilm) return;
   const friend = document.getElementById('input-friend').value || '';
-  const genreStr = document.getElementById('input-genres').value;
   const lb = parseFloat(document.getElementById('input-lb').value) || null;
-  const genres = genreStr ? genreStr.toLowerCase().split(',').map(g => g.trim()).filter(Boolean) : ['uncategorised'];
+
+  // Fetch tagline from TMDB
+  let tagline = '';
+  try {
+    const r = await fetch(`https://api.themoviedb.org/3/movie/${selectedFilm.tmdbId}?api_key=8265bd1679663a7ea12ac168da84d2e8`);
+    const d = await r.json();
+    tagline = d.tagline || '';
+  } catch(e) {}
 
   const { data, error } = await sb.from('films').insert({
-    title, year, friend, genres, lb_score: lb, watched: false
+    title: selectedFilm.title,
+    year: selectedFilm.year,
+    friend,
+    genres: selectedFilm.genres,
+    lb_score: lb,
+    watched: false,
+    poster_url: selectedFilm.poster,
+    tagline
   }).select().single();
 
   if (error) { console.error('addFilm error:', error); return; }
 
+  const key = `${selectedFilm.title}_${selectedFilm.year}`;
+  cache[key] = { poster: selectedFilm.poster, tagline };
+
   getFriendColor(friend);
-  films.unshift({ id: data.id, title, year, friend, genres, lb, watched: false, poster: null, tagline: '' });
+  films.unshift({
+    id: data.id,
+    title: selectedFilm.title,
+    year: selectedFilm.year,
+    friend,
+    genres: selectedFilm.genres,
+    lb,
+    watched: false,
+    poster: selectedFilm.poster,
+    tagline
+  });
   closeModal();
   render();
 }
+
 
 async function markWatched(id) {
   const { error } = await sb.from('films').update({ watched: true }).eq('id', id);
