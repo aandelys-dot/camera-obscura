@@ -346,6 +346,7 @@ function render() {
             <div class="film-hover-genres">${f.genres.map(g => `<span class="film-hover-genre-tag">${g}</span>`).join('')}</div>
             ${f.lb ? `<span class="film-hover-score">${f.lb}</span>` : ''}
             ${!f.watched ? `<button class="film-mark-btn" onclick="markWatched('${f.id}')">watched</button>` : ''}
+            <button class="film-mark-btn" onclick="deleteFilm('${f.id}')" style="color:rgba(196,120,120,0.7);border-color:rgba(196,120,120,0.25);">delete</button>
           </div>
         </div>
       </div>
@@ -358,6 +359,7 @@ function render() {
         <div class="film-info-mobile-row">
           ${f.lb ? `<span style="font-size:10px;color:#c8a96e;">${f.lb}</span>` : ''}
           ${!f.watched ? `<button class="film-mark-btn" onclick="markWatched('${f.id}')">watched</button>` : '<span style="font-size:9px;color:#3d6b4a;letter-spacing:0.06em;">seen</span>'}
+          <button class="film-mark-btn" onclick="deleteFilm('${f.id}')" style="color:rgba(196,120,120,0.7);border-color:rgba(196,120,120,0.25);">delete</button>
         </div>
       </div>
     </div>`;
@@ -597,6 +599,15 @@ async function markWatched(id) {
   const { error } = await sb.from('films').update({ watched: true }).eq('id', id);
   if (error) { console.error('markWatched error:', error); return; }
   films = films.map(f => f.id === id ? { ...f, watched: true } : f);
+  render();
+}
+
+async function deleteFilm(id) {
+  const film = films.find(f => f.id === id);
+  if (!confirm(`Remove "${film?.title}" from your list?`)) return;
+  const { error } = await sb.from('films').delete().eq('id', id);
+  if (error) { alert('Error deleting: ' + error.message); return; }
+  films = films.filter(f => f.id !== id);
   render();
 }
 
