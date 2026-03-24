@@ -25,25 +25,25 @@ body { padding: 0 clamp(1.5rem, 6vw, 5rem); }
 .logo-img, .header img { width: 600px; max-width: 90vw; height: auto; }
 
 .tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 1px solid #2a2a2a; }
-.tab { background: none; border: none; font-family: 'Thernaly', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #555; padding: 8px 16px 10px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+.tab { background: none; border: none; font-family: 'Thernaly', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #555; padding: 10px 20px 12px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
 .tab.active { color: #c8a96e; border-bottom-color: #c8a96e; }
 
 .search-row { margin-bottom: 1rem; }
-.search-input { width: 100%; background: #161616; border: 1px solid #2a2a2a; color: #e8e4dc; font-family: 'Thernaly', sans-serif; font-size: 13px; padding: 9px 14px; border-radius: 2px; outline: none; transition: border-color 0.15s; }
+.search-input { width: 100%; background: #161616; border: 1px solid #2a2a2a; color: #e8e4dc; font-family: 'Thernaly', sans-serif; font-size: 15px; padding: 11px 16px; border-radius: 2px; outline: none; transition: border-color 0.15s; }
 .search-input::placeholder { color: #444; }
 .search-input:focus { border-color: #444; }
 
 .genre-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
-.pill { background: none; border: 1px solid #2a2a2a; color: #555; font-family: 'Thernaly', sans-serif; font-size: 11px; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
+.pill { background: none; border: 1px solid #2a2a2a; color: #555; font-family: 'Thernaly', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; padding: 6px 14px; border-radius: 2px; cursor: pointer; transition: all 0.15s; }
 .pill:hover { border-color: #444; color: #888; }
 .pill.active { border-color: #c8a96e; color: #c8a96e; background: rgba(200,169,110,0.06); }
 
-.add-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid #2a2a2a; color: #555; font-family: 'Thernaly', sans-serif; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; border-radius: 2px; cursor: pointer; margin-bottom: 1.25rem; transition: all 0.15s; }
+.add-btn { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid #2a2a2a; color: #555; font-family: 'Thernaly', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 18px; border-radius: 2px; cursor: pointer; margin-bottom: 1.25rem; transition: all 0.15s; }
 .add-btn:hover { border-color: #444; color: #888; }
 
-.rec-count { font-size: 11px; color: #444; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+.rec-count { font-size: 13px; color: #555; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem; }
 
-.film-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+.film-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
 .film-card { position: relative; background: #111; border-radius: 3px; overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; }
 .film-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 2; }
 .film-poster { position: relative; width: 100%; padding-bottom: 150%; background: #1a1a1a; overflow: hidden; }
@@ -54,29 +54,29 @@ body { padding: 0 clamp(1.5rem, 6vw, 5rem); }
 .film-watched-badge { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; background: rgba(61,107,74,0.85); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #78b98c; pointer-events: none; z-index: 3; }
 .film-hover-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0) 70%); opacity: 0; transition: opacity 0.2s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px 10px 12px; z-index: 4; }
 .film-card:hover .film-hover-overlay { opacity: 1; }
-.film-hover-tagline { font-size: 10px; color: rgba(232,228,220,0.75); font-style: italic; line-height: 1.45; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.film-hover-tagline { font-size: 12px; color: rgba(232,228,220,0.85); font-style: italic; line-height: 1.45; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .film-hover-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
-.film-hover-score { font-size: 14px; color: #c8a96e; flex-shrink: 0; }
+.film-hover-score { font-size: 16px; font-weight: 600; color: #c8a96e; flex-shrink: 0; }
 .film-hover-genres { display: flex; gap: 3px; flex-wrap: wrap; flex: 1; }
-.film-hover-genre-tag { font-size: 9px; color: rgba(80,80,80,0.9); letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid rgba(40,40,40,0.8); padding: 1px 5px; border-radius: 1px; }
+.film-hover-genre-tag { font-size: 11px; color: rgba(100,100,100,0.9); letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid rgba(40,40,40,0.8); padding: 1px 5px; border-radius: 1px; }
 .film-hover-overlay .friend-pill { font-size: 10px; padding: 2px 8px; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.film-mark-btn { font-size: 9px; color: rgba(61,107,74,0.8); letter-spacing: 0.06em; text-transform: uppercase; background: none; border: 1px solid rgba(61,107,74,0.3); font-family: 'Thernaly', sans-serif; cursor: pointer; padding: 2px 7px; border-radius: 2px; transition: all 0.15s; flex-shrink: 0; }
+.film-mark-btn { font-size: 11px; color: rgba(61,107,74,0.8); letter-spacing: 0.06em; text-transform: uppercase; background: none; border: 1px solid rgba(61,107,74,0.3); font-family: 'Thernaly', sans-serif; cursor: pointer; padding: 2px 7px; border-radius: 2px; transition: all 0.15s; flex-shrink: 0; }
 .film-mark-btn:hover { border-color: rgba(61,107,74,0.7); color: #78b98c; }
 .film-info { padding: 8px 9px 9px; background: #111; }
-.film-title { font-family: 'Verve', serif; font-size: 13px; color: #e8e4dc; line-height: 1.2; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.film-title { font-family: 'Verve', serif; font-size: 15px; font-weight: 600; color: #e8e4dc; line-height: 1.2; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .film-meta { display: flex; align-items: center; gap: 5px; }
-.film-year { font-size: 10px; color: #444; letter-spacing: 0.07em; }
+.film-year { font-size: 12px; color: #555; letter-spacing: 0.05em; }
 .film-friend-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .film-info-mobile-row { display: none; gap: 6px; align-items: center; margin-top: 4px; }
 @media (max-width: 600px) {
   body { padding: 0 1rem; }
   .app { padding: 1.5rem 0; }
-  .film-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-  .film-title { font-size: 12px; }
+  .film-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .film-title { font-size: 14px; }
   .film-hover-overlay { display: none; }
   .film-info-mobile-row { display: flex; }
 }
-.friend-pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.04em; border: 1px solid; flex-shrink: 0; }
+.friend-pill { font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 999px; letter-spacing: 0.04em; border: 1px solid; flex-shrink: 0; }
 .empty { padding: 3rem 0; color: #333; font-size: 12px; letter-spacing: 0.06em; text-align: center; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; }
