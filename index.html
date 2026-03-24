@@ -311,7 +311,7 @@ async function fetchFilmData(title, year) {
       const movie2 = await r2.json();
       cache[key] = {
         poster: movie2.poster_path ? `https://image.tmdb.org/t/p/w342${movie2.poster_path}` : null,
-        tagline: movie2.tagline || ''
+        tagline: movie2.overview || ''
       };
     } else { cache[key] = { poster: null, tagline: '' }; }
   } catch { cache[key] = { poster: null, tagline: '' }; }
