@@ -170,6 +170,7 @@ let friends = [];
 let cache = {};
 let activeGenre = null;
 let friendColorMap = {};
+let currentUserId = null;
 let colorIndex = 0;
 let currentTab = 'films';
 
@@ -254,6 +255,8 @@ async function signOut() {
 async function loadData() {
   friendColorMap = {};
   colorIndex = 0;
+  const { data: { user } } = await sb.auth.getUser();
+  currentUserId = user?.id || null;
 
   const [filmsRes, friendsRes] = await Promise.all([
     sb.from('films').select('*').order('created_at', { ascending: false }),
@@ -532,7 +535,7 @@ async function addFilm() {
 
   // Auto-add new friend if not in list
   if (friend && !friends.find(f => f.name === friend)) {
-    await sb.from('friends').insert({ name: friend, lb_username: null });
+    await sb.from('friends').insert({ name: friend, lb_username: null, user_id: currentUserId });
     friends.push({ name: friend, lb: null });
     getFriendColor(friend);
   }
@@ -546,6 +549,7 @@ async function addFilm() {
   } catch(e) {}
 
   const { data, error } = await sb.from('films').insert({
+    user_id: currentUserId,
     title: selectedFilm.title,
     year: selectedFilm.year,
     friend,
