@@ -531,11 +531,18 @@ async function addFilm() {
   if (!selectedFilm) { alert('Select a film from the search results first.'); return; }
   const addBtn = document.querySelector('#modal .btn-primary');
   if (addBtn) { addBtn.textContent = 'saving…'; addBtn.disabled = true; }
+
+  // Always fetch fresh user ID
+  const { data: { user } } = await sb.auth.getUser();
+  const userId = user?.id;
+  if (!userId) { alert('Session expired — please sign in again.'); closeModal(); return; }
+  currentUserId = userId;
+
   const friend = document.getElementById('input-friend').value.trim() || '';
 
   // Auto-add new friend if not in list
   if (friend && !friends.find(f => f.name === friend)) {
-    await sb.from('friends').insert({ name: friend, lb_username: null, user_id: currentUserId });
+    await sb.from('friends').insert({ name: friend, lb_username: null, user_id: userId });
     friends.push({ name: friend, lb: null });
     getFriendColor(friend);
   }
@@ -549,7 +556,7 @@ async function addFilm() {
   } catch(e) {}
 
   const { data, error } = await sb.from('films').insert({
-    user_id: currentUserId,
+    user_id: userId,
     title: selectedFilm.title,
     year: selectedFilm.year,
     friend,
